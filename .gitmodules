@@ -1,0 +1,12 @@
+[submodule "extern/sdf"]
+	path = extern/sdf
+	url = git@github.com:sxyu/sdf.git
+[submodule "extern/assimp"]
+	path = extern/assimp
+	url = git@github.com:assimp/assimp.git
+[submodule "extern/meshview"]
+	path = extern/meshview
+	url = git@github.com:sxyu/meshview.git
+[submodule "extern/pybind11"]
+	path = extern/pybind11
+	url = git@github.com:pybind/pybind11.git
