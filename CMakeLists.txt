@@ -13,11 +13,11 @@ add_subdirectory(extern/meshview)
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.hpp)
 
 add_executable(SeminarCG ${SOURCES})
-target_link_libraries(SeminarCG PUBLIC sdf meshview assimp)
+target_link_libraries(SeminarCG PUBLIC sdf meshview assimp pybind11::embed)
 target_include_directories(SeminarCG 
     PUBLIC 
     extern/sdf 
     extern/assimp 
     extern/meshview 
-    extern/pybind11 
+    extern/pybind11/include
     src)
