@@ -2,8 +2,6 @@ import skimage.measure as measure
 import numpy as np
 import time
 
-results = TestResults()
-
 # reshape volume
 sdf_volume = np.reshape(sdf_at_points, (resolution[0], resolution[1], resolution[2]))
 
@@ -14,7 +12,6 @@ end_time = time.time()
 
 results.time_ms = (end_time - start_time) * 1000.0
 
-results.out_mesh = TriangleMesh()
 results.out_mesh.vertices = vertices
 results.out_mesh.indices = indices
 

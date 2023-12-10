@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "testing_pipeline.hpp"
 
 int main()

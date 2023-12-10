@@ -57,6 +57,10 @@ sdf::Triangles TestingPipeline::assimp_to_eigen_indices(aiFace* indices, int num
     return indices_eigen;
 }
 
+std::unique_ptr<TestResults>& TestingPipeline::getResults(const std::string& method_name, int id) {
+    return test_results[method_name].at(id);
+}
+
 void TestingPipeline::run(const std::string& filename) {
 
     // Import model
@@ -79,7 +83,7 @@ void TestingPipeline::run(const std::string& filename) {
     sdf::SDF sdf(vertices, indices);
 
     // Create volume sample points
-    const Eigen::Ref<const Eigen::Matrix<float, 6, 1>> aabb = sdf.aabb();
+    const AABB aabb = sdf.aabb();
 
     float size_x = aabb(3) - aabb(0);
     float size_y = aabb(4) - aabb(1);
@@ -109,14 +113,16 @@ void TestingPipeline::run(const std::string& filename) {
     sdf::Vector sdf_at_points = sdf(points);
 
     for (auto& test : tests) {
-        auto results = test->run(sdf_at_points, resolution, spacing, aabb);
-        std::cout << test->name << ": " << results.time_ms << "ms" << std::endl;
-        // Visualize sample points and mesh
-        meshview::Viewer viewer;
-        viewer.wireframe = true;
-        viewer.add_point_cloud(points);
-        viewer.add_mesh(results.out_mesh.vertices, results.out_mesh.indices);
-        viewer.show();
+        std::unique_ptr<TestResults> results = test->run(sdf_at_points, resolution, spacing, aabb);
+        std::cout << test->name << ": " << results->time_ms << "ms" << std::endl;
+        // // Visualize sample points and mesh
+        // meshview::Viewer viewer;
+        // viewer.wireframe = true;
+        // viewer.add_point_cloud(points);
+        // viewer.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
+        // viewer.show();
+
+        test_results[test->name].push_back(std::move(results));
     }
 }
 

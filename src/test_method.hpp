@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <Eigen/Dense>
 #include "sdf/sdf.hpp"
@@ -27,5 +28,5 @@ public:
     }
 
     std::string name;
-    virtual TestResults run(Eigen::Ref<sdf::Vector> sdf_at_points, Eigen::Ref<Eigen::Vector3i> resolution, float spacing, AABB bounds) = 0;
+    virtual std::unique_ptr<TestResults> run(Eigen::Ref<sdf::Vector> sdf_at_points, Eigen::Ref<Eigen::Vector3i> resolution, float spacing, AABB bounds) = 0;
 };
