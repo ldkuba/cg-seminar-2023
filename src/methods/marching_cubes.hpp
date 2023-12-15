@@ -16,24 +16,27 @@ public:
     MarchingCubes()
         : TestMethod("Marching Cubes") {}
 
-    std::unique_ptr<TestResults> MarchingCubes::run(Eigen::Ref<sdf::Vector> sdf_at_points, Eigen::Ref<Eigen::Vector3i> resolution, float spacing, AABB bounds) override {
+    std::unique_ptr<TestResults> MarchingCubes::run(const TestInputData& input) override {
         auto results = std::make_unique<TestResults>();
 
         PY_CALL_START
         auto locals = py::dict();
-        locals["sdf_at_points"] = sdf_at_points;
-        locals["resolution"] = resolution;
-        locals["spacing"] = spacing;
+        locals["sdf_at_points"] = input.sdf_at_points;
+        locals["resolution"] = input.resolution;
+        locals["spacing"] = input.spacing;
         locals["results"] = results.get();
 
         py::eval_file("src/methods/marching_cubes.py", py::globals(), locals);
-        //py::globals().attr("update")(locals);
         *results = locals["results"].cast<TestResults>();
         PY_CALL_END
 
+        // === Set test result data ===
         // Output vertices start at (0, 0, 0). Move all vertices to the aabb minimum
-        Eigen::Vector3f delta(bounds(0), bounds(1), bounds(2));
+        Eigen::Vector3f delta(input.bounds(0), input.bounds(1), input.bounds(2));
         results->out_mesh.vertices.rowwise() += delta.transpose();
+
+        // Method name
+        results->method = this->name;
 
         return results;
     }

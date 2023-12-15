@@ -7,7 +7,7 @@ sdf_volume = np.reshape(sdf_at_points, (resolution[0], resolution[1], resolution
 
 # run marching cubes
 start_time = time.time()
-vertices, indices, normals, values = measure.marching_cubes(sdf_volume, spacing=(spacing, spacing, spacing), gradient_direction='ascent')
+vertices, indices, normals, values = measure.marching_cubes(sdf_volume, level=0, spacing=(spacing, spacing, spacing), gradient_direction='ascent')
 end_time = time.time()
 
 results.time_ms = (end_time - start_time) * 1000.0
@@ -15,7 +15,7 @@ results.time_ms = (end_time - start_time) * 1000.0
 results.out_mesh.vertices = vertices
 results.out_mesh.indices = indices
 
-## === visualize mesh ===
+# # === visualize mesh ===
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
 
@@ -24,7 +24,7 @@ results.out_mesh.indices = indices
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')
 
-# ax.plot_trisurf(vertices[:,0], vertices[:,2], vertices[:,1], triangles=triangles, edgecolor=[[0,0,0]], linewidth=1.0, alpha=0.0, shade=True)
+# ax.plot_trisurf(vertices[:,0], vertices[:,2], vertices[:,1], triangles=indices, edgecolor=[[0,0,0]], linewidth=1.0, alpha=0.0, shade=True)
 
 # x = vertices[:,0]
 # y = vertices[:,2]
