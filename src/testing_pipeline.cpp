@@ -201,7 +201,7 @@ void TestingPipeline::run(const std::string& filename, const std::string& catego
     test_entry.in_mesh_point_cloud_edge.second = test_entry.in_mesh_point_cloud.second(edge_points, {0, 1, 2});
 
     for (auto& test : tests) {
-        std::unique_ptr<TestResults> results = test->run({sdf_at_points, resolution, spacing, aabb});
+        std::unique_ptr<TestResults> results = test->run({points, sdf_at_points, resolution, spacing, aabb});
         std::cout << test->name << ": " << results->time_ms << "ms" << std::endl;
 
         // // Visualize mesh

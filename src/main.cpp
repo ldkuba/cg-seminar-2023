@@ -2,10 +2,12 @@
 
 #include "testing_pipeline.hpp"
 #include "methods/marching_cubes.hpp"
+#include "methods/reach_for_the_spheres.hpp"
 
 int main()
 {
-    TestingPipeline pipeline(TestingPipeline::PipelineSettings{200, 10000, 15.0f});
+    TestingPipeline pipeline(TestingPipeline::PipelineSettings{50, 10000, 15.0f});
+    pipeline.add_test_method(std::make_unique<ReachForTheSpheres>());
     pipeline.add_test_method(std::make_unique<MarchingCubes>());
 
     pipeline.run("models/lantern.obj", "test");

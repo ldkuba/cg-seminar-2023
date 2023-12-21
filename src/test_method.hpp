@@ -50,6 +50,7 @@ struct TestEntry {
 
 // Used to pass input data to the methods
 struct TestInputData {
+    Eigen::Ref<sdf::Points> sdf_points;
     Eigen::Ref<sdf::Vector> sdf_at_points;
     Eigen::Ref<Eigen::Vector3i> resolution;
     float spacing;
