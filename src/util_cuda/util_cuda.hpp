@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <Eigen/Dense>
+#include "triangle_mesh.hpp"
 
 using Points = Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>;
 
@@ -11,6 +12,7 @@ public:
 
     std::vector<int> compute_edge_set(const Points& point_cloud, const Points& normals, float normal_epsilon, float distance_epsilon);
     Eigen::VectorXf compute_angles(const Points& out_points, const Points& out_normals, const Points& gt_points, const Points& gt_normals, float angle_threshold);
+    Eigen::VectorXf compute_aspect_ratios(const TriangleMesh& mesh);
 
 private:
     // Edge set

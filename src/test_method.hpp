@@ -8,12 +8,9 @@
 #include <Eigen/Dense>
 #include "sdf/sdf.hpp"
 
-using AABB = Eigen::Ref<const Eigen::Matrix<float, 6, 1>>;
+#include "triangle_mesh.hpp"
 
-struct TriangleMesh {
-    sdf::Points vertices;
-    sdf::Triangles indices;
-};
+using AABB = Eigen::Ref<const Eigen::Matrix<float, 6, 1>>;
 
 struct EvaluationMetrics {
     float chamfer_distance;
@@ -21,6 +18,10 @@ struct EvaluationMetrics {
     float edge_chamfer_distance;
     float edge_f1_score;
     float inaccurate_normals;
+    float mean_normal_error;
+    float mean_aspect_ratio;
+    float min_aspect_ratio;
+    float max_aspect_ratio;
 };
 
 // Represents the results of one method on one model/dataset element

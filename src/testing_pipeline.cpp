@@ -192,6 +192,7 @@ void TestingPipeline::run(const std::string& filename, const std::string& catego
 #ifdef HAS_CUDA
     std::vector<int> edge_points = _cuda_util.compute_edge_set(test_entry.in_mesh_point_cloud.first, test_entry.in_mesh_point_cloud.second, 0.2f, 0.1f);
 #else
+    std::vector<int> edge_points;
     throw std::runtime_error("CPU edge set computation not implemented yet!");
 #endif
     auto edge_set_time = std::chrono::high_resolution_clock::now();
@@ -242,6 +243,7 @@ void TestingPipeline::evaluation_metrics(std::unique_ptr<TestResults>& results, 
 #ifdef HAS_CUDA
     std::vector<int> edge_points = _cuda_util.compute_edge_set(point_cloud_pair.first, point_cloud_pair.second, 0.2f, 0.1f);
 #else
+    std::vector<int> edge_points;
     throw std::runtime_error("CPU edge set computation not implemented yet!");
 #endif
     std::pair<sdf::Points, sdf::Points> point_cloud_pair_edge = {point_cloud_pair.first(edge_points, {0, 1, 2}), point_cloud_pair.second(edge_points, {0, 1, 2})};
@@ -265,9 +267,11 @@ void TestingPipeline::evaluation_metrics(std::unique_ptr<TestResults>& results, 
 #ifdef HAS_CUDA
     Eigen::VectorXf angles = _cuda_util.compute_angles(point_cloud_pair.first, point_cloud_pair.second, gt_point_cloud.first, gt_point_cloud.second, _settings.inacurate_normals_threshold);
 #else
+    Eigen::VectorXf angles;
     throw std::runtime_error("CPU normal angle computation not implemented yet!");
 #endif
     results->metrics.inaccurate_normals = (angles.array() > _settings.inacurate_normals_threshold).count() / static_cast<float>(angles.size());
+    results->metrics.mean_normal_error = angles.sum() / static_cast<float>(angles.size());
 
     // // Visualize normals
     // sdf::Points angle_colors(angles.size(), 3);
@@ -290,6 +294,17 @@ void TestingPipeline::evaluation_metrics(std::unique_ptr<TestResults>& results, 
     // }
     // viewer.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
     // viewer.show();
+
+    // Triangle aspect ratio 
+#ifdef HAS_CUDA
+    Eigen::VectorXf aspect_ratios = _cuda_util.compute_aspect_ratios(results->out_mesh);
+#else
+    Eigen::VectorXf aspect_ratios;
+    throw std::runtime_error("CPU aspect ratio computation not implemented yet!");
+#endif
+    results->metrics.mean_aspect_ratio = aspect_ratios.sum() / static_cast<float>(aspect_ratios.size());
+    results->metrics.min_aspect_ratio = aspect_ratios.minCoeff();
+    results->metrics.max_aspect_ratio = aspect_ratios.maxCoeff();
 }
 
 TestingPipeline::~TestingPipeline() {
