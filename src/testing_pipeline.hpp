@@ -30,6 +30,7 @@ public:
         unsigned int evaluation_pt_size;
 
         float inacurate_normals_threshold;
+        float sliver_triangle_angle;
     };
 
     TestingPipeline(const PipelineSettings& settings);

@@ -295,9 +295,11 @@ void TestingPipeline::evaluation_metrics(std::unique_ptr<TestResults>& results, 
     // viewer.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
     // viewer.show();
 
-    // Triangle aspect ratio 
+    // Triangle aspect ratio and % of sliver triangles
 #ifdef HAS_CUDA
-    Eigen::VectorXf aspect_ratios = _cuda_util.compute_aspect_ratios(results->out_mesh);
+    std::pair<Eigen::VectorXf, Eigen::VectorXf> aspect_ratios_and_min_angles = _cuda_util.compute_aspect_ratios_and_min_angles(results->out_mesh);
+    Eigen::VectorXf& aspect_ratios = aspect_ratios_and_min_angles.first;
+    Eigen::VectorXf& min_angles = aspect_ratios_and_min_angles.second;
 #else
     Eigen::VectorXf aspect_ratios;
     throw std::runtime_error("CPU aspect ratio computation not implemented yet!");
@@ -305,6 +307,8 @@ void TestingPipeline::evaluation_metrics(std::unique_ptr<TestResults>& results, 
     results->metrics.mean_aspect_ratio = aspect_ratios.sum() / static_cast<float>(aspect_ratios.size());
     results->metrics.min_aspect_ratio = aspect_ratios.minCoeff();
     results->metrics.max_aspect_ratio = aspect_ratios.maxCoeff();
+
+    results->metrics.percent_sliver_triangles = (min_angles.array() < _settings.sliver_triangle_angle).count() / static_cast<float>(min_angles.size());
 }
 
 TestingPipeline::~TestingPipeline() {

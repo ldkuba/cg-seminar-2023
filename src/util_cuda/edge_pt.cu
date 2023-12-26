@@ -197,7 +197,7 @@ Eigen::VectorXf CudaUtil::compute_angles(const Points& out_points, const Points&
     return ret;
 }
 
-__global__ void cu_compute_normal_accuracy(Eigen::Vector3f* vertices, Eigen::Vector3i* indices, float* aspect_ratios, size_t num_triangles) {
+__global__ void cu_compute_normal_accuracy(Eigen::Vector3f* vertices, Eigen::Vector3i* indices, float* aspect_ratios, float* min_angles, size_t num_triangles) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= num_triangles) return;
 
@@ -209,45 +209,69 @@ __global__ void cu_compute_normal_accuracy(Eigen::Vector3f* vertices, Eigen::Vec
     float b = (v2 - v0).norm();
     float c = (v2 - v1).norm();
 
+    // Aspect ratio
     float s = (a + b + c) / 2.0f;
     aspect_ratios[idx] = (a * b * c) / (8.0f * (s-a) * (s-b) * (s-c));
+
+    // Min angle
+    float min_angle = 0.0f;
+    if(a <= b && a <= c) {
+        float cos_a = fmax(fmin((b*b + c*c - a*a) / (2.0f * b * c), 1.0f), -1.0f);
+        min_angle = acos(cos_a) * 180.0 / PI;
+    } else if(b <= a && b <= c) {
+        float cos_b = fmax(fmin((a*a + c*c - b*b) / (2.0f * a * c), 1.0f), -1.0f);
+        min_angle = acos(cos_b) * 180.0 / PI;
+    } else {
+        float cos_c = fmax(fmin((b*b + a*a - c*c) / (2.0f * b * a), 1.0f), -1.0f);
+        min_angle = acos(cos_c) * 180.0 / PI;
+    }
+    min_angles[idx] = min_angle;
 }
 
-Eigen::VectorXf CudaUtil::compute_aspect_ratios(const TriangleMesh& mesh) {
+std::pair<Eigen::VectorXf, Eigen::VectorXf> CudaUtil::compute_aspect_ratios_and_min_angles(const TriangleMesh& mesh) {
     size_t num_triangles = mesh.indices.rows();
 
     // CUDA pointers
     Eigen::Vector3f* vertices_device;
     Eigen::Vector3i* indices_device;
     float* out_aspect_ratios_device;
+    float* out_min_angles_device;
 
     // Host pointers
     float* out_aspect_ratios;
+    float* out_min_angles;
 
     cudaMalloc(&vertices_device, mesh.vertices.rows()*sizeof(Eigen::Vector3f));
     cudaMalloc(&indices_device, num_triangles*sizeof(Eigen::Vector3i));
     cudaMalloc(&out_aspect_ratios_device, num_triangles*sizeof(float));
+    cudaMalloc(&out_min_angles_device, num_triangles*sizeof(float));
     out_aspect_ratios = new float[num_triangles];
+    out_min_angles = new float[num_triangles];
 
     cudaMemcpy(vertices_device, mesh.vertices.data(), mesh.vertices.rows()*sizeof(Eigen::Vector3f), cudaMemcpyHostToDevice);
     cudaMemcpy(indices_device, mesh.indices.data(), num_triangles*sizeof(Eigen::Vector3i), cudaMemcpyHostToDevice);
 
     // Run kernel
-    cu_compute_normal_accuracy<<<(num_triangles+1023)/1024,1024>>>(vertices_device, indices_device, out_aspect_ratios_device, num_triangles);
+    cu_compute_normal_accuracy<<<(num_triangles+1023)/1024,1024>>>(vertices_device, indices_device, out_aspect_ratios_device, out_min_angles_device, num_triangles);
 
     // Copy back
     cudaMemcpy(out_aspect_ratios, out_aspect_ratios_device, num_triangles*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(out_min_angles, out_min_angles_device, num_triangles*sizeof(float), cudaMemcpyDeviceToHost);
 
-    Eigen::VectorXf ret(num_triangles);
+    Eigen::VectorXf aspect_ratios(num_triangles);
+    Eigen::VectorXf min_angles(num_triangles);
     for(size_t i = 0; i < num_triangles; i++) {
-        ret(i) = out_aspect_ratios[i];
+        aspect_ratios(i) = out_aspect_ratios[i];
+        min_angles(i) = out_min_angles[i];
     }
 
     // Free memory
     cudaFree(vertices_device);
     cudaFree(indices_device);
     cudaFree(out_aspect_ratios_device);
+    cudaFree(out_min_angles_device);
     delete[] out_aspect_ratios;
+    delete[] out_min_angles;
 
-    return ret;
+    return std::make_pair(aspect_ratios, min_angles);
 }

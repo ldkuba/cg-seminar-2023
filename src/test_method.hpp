@@ -15,13 +15,18 @@ using AABB = Eigen::Ref<const Eigen::Matrix<float, 6, 1>>;
 struct EvaluationMetrics {
     float chamfer_distance;
     float f1_score;
+
     float edge_chamfer_distance;
     float edge_f1_score;
+
     float inaccurate_normals;
     float mean_normal_error;
+
     float mean_aspect_ratio;
     float min_aspect_ratio;
     float max_aspect_ratio;
+
+    float percent_sliver_triangles;
 };
 
 // Represents the results of one method on one model/dataset element
