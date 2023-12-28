@@ -2,8 +2,6 @@ import torch
 import numpy as np
 import kaolin.metrics.pointcloud as pt
 
-print(torch.cuda.is_available())
-
 # pack point clouds into tensors
 out_point_cloud_tensor = torch.tensor(np.expand_dims(out_point_cloud, 0), device='cuda:0', dtype=torch.float32)
 gt_point_cloud_tensor = torch.tensor(np.expand_dims(gt_point_cloud, 0), device='cuda:0', dtype=torch.float32)

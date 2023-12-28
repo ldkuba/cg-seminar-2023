@@ -205,27 +205,27 @@ void TestingPipeline::run(const std::string& filename, const std::string& catego
         std::unique_ptr<TestResults> results = test->run({points, sdf_at_points, resolution, spacing, aabb});
         std::cout << test->name << ": " << results->time_ms << "ms" << std::endl;
 
-        // // Visualize mesh
-        // sdf::Points pt_colors(points.rows(), 3);
-        // for (int i = 0; i < points.rows(); i++) {
-        //     pt_colors(i, 0) = sdf_at_points(i) < 0.0f ? 1.0f : 0.0f;
-        //     pt_colors(i, 1) = sdf_at_points(i) > 0.0f ? 1.0f : 0.0f;
-        //     pt_colors(i, 2) = 0.0f;
-        // }
+        // Visualize mesh
+        sdf::Points pt_colors(points.rows(), 3);
+        for (int i = 0; i < points.rows(); i++) {
+            pt_colors(i, 0) = sdf_at_points(i) < 0.0f ? 1.0f : 0.0f;
+            pt_colors(i, 1) = sdf_at_points(i) > 0.0f ? 1.0f : 0.0f;
+            pt_colors(i, 2) = 0.0f;
+        }
 
-        // meshview::Viewer viewer;
-        // viewer.wireframe = true;
-        // //viewer.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
-        // viewer.add_point_cloud(points, pt_colors);
-        // viewer.add_mesh(vertices, indices);
-        // viewer.show();
+        meshview::Viewer viewer;
+        viewer.wireframe = true;
+        //viewer.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
+        viewer.add_point_cloud(points, pt_colors);
+        viewer.add_mesh(vertices, indices);
+        viewer.show();
 
-        // meshview::Viewer viewer2;
-        // viewer2.wireframe = true;
-        // viewer2.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
-        // viewer2.add_point_cloud(points, pt_colors);
-        // //viewer2.add_mesh(vertices, indices);
-        // viewer2.show();
+        meshview::Viewer viewer2;
+        viewer2.wireframe = true;
+        viewer2.add_mesh(results->out_mesh.vertices, results->out_mesh.indices);
+        viewer2.add_point_cloud(points, pt_colors);
+        //viewer2.add_mesh(vertices, indices);
+        viewer2.show();
 
         // Run evaluation metrics
         evaluation_metrics(results, test_entry.in_mesh_point_cloud, test_entry.in_mesh_point_cloud_edge);

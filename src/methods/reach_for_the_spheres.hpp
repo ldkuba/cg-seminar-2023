@@ -23,6 +23,9 @@ public:
         auto locals = py::dict();
         locals["sdf_points"] = input.sdf_points;
         locals["sdf_at_points"] = input.sdf_at_points;
+        locals["resolution"] = input.resolution;
+        locals["spacing"] = input.spacing;
+        locals["bounds"] = input.bounds;
         locals["results"] = results.get();
 
         py::eval_file("src/methods/reach_for_the_spheres.py", py::globals(), locals);
